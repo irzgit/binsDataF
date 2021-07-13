@@ -37,7 +37,7 @@ private:
     void filtMatlab();
 
 public:
-    int count = 0;
+    int count;
     QVector <QString> allData;//все строки
     QVector <Quaternion> quaternions;//все кватернионы
     QVector <p_data> accelerations;//все ускорения
@@ -47,6 +47,7 @@ public:
     QVector <float> magnLp;//магнитуды ускорений
     QVector <int> statPeriods;//стационарные периоды
 
+    float gMag=0;   //магнитуда с гироскопа
     float lpMag = 0;//хранение данный отфильтрованной магнитуды
     float statKoeff = 0.15;//коэффициэнт отсечения
     p_data i_vel{0.0,0.0,0.0};//переменная для интегрирования скоростей

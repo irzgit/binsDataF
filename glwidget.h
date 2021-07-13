@@ -8,6 +8,7 @@
 #include <QOpenGLBuffer>
 #include "masterthread.h"
 #include "datawork.h"
+#include "runningAverage.h"
 
 class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
@@ -30,6 +31,8 @@ public:
     void saveLog();
     void readFromFile();
     void selectFilter(int mode);
+    int getBins();
+
 
     int chart_mod = 1;
 
@@ -70,8 +73,7 @@ private:
     void renderText(double x, double y, QString str);
 
 
-    datawork bins_data;
-
+    datawork  bins_data;
     QString bufline;
 
 

@@ -75,8 +75,12 @@ Window::Window()
     chooseFilterLabel = new QLabel(tr("Select filter: "),this);
     m_chooseFilter = new QComboBox(this);
     m_chooseFilter->setMaximumWidth(300);
-    m_chooseFilter->addItem("standart");
-    m_chooseFilter->addItem("matlabfunction");
+    m_chooseFilter->addItem("no filter");
+    m_chooseFilter->addItem("GMedian3");
+    m_chooseFilter->addItem("GMedian");
+    m_chooseFilter->addItem("GLinear");
+    m_chooseFilter->addItem("FastFilter");
+
     connect(m_chooseFilter, &QComboBox::currentTextChanged, this, &Window::chooseFilterChange);
 
     //proection
@@ -171,51 +175,52 @@ void Window::chooseChartChange()
 {
     switch(m_chooseChart->currentIndex())
     {
-        case 0:
-        {
-            currentGlWidget->rot_3d();
-            currentGlWidget->chart_mod = 1;
-            xBtn->setEnabled(true);
-            yBtn->setEnabled(true);
-            zBtn->setEnabled(true);
-            break;
-        }
-        case 1:
-        {
-            currentGlWidget->rot_2d();
-            currentGlWidget->chart_mod = 2;
-            xBtn->setEnabled(false);
-            yBtn->setEnabled(false);
-            zBtn->setEnabled(false);
-            break;
-        }
-        case 2:
-        {
-            currentGlWidget->rot_2d();
-            currentGlWidget->chart_mod = 3;
-            xBtn->setEnabled(false);
-            yBtn->setEnabled(false);
-            zBtn->setEnabled(false);
-            break;
-        }
-        case 3:
-        {
-            currentGlWidget->rot_2d();
-            currentGlWidget->chart_mod = 4;
-            xBtn->setEnabled(false);
-            yBtn->setEnabled(false);
-            zBtn->setEnabled(false);
-            break;
-        }
-        case 4:
-        {
-            currentGlWidget->rot_2d();
-            currentGlWidget->chart_mod = 5;
-            xBtn->setEnabled(false);
-            yBtn->setEnabled(false);
-            zBtn->setEnabled(false);
-            break;
-        }
+    case 0:
+    {
+
+        currentGlWidget->rot_3d();
+        currentGlWidget->chart_mod = 1;
+        xBtn->setEnabled(true);
+        yBtn->setEnabled(true);
+        zBtn->setEnabled(true);
+        break;
+    }
+    case 1:
+    {
+        currentGlWidget->rot_2d();
+        currentGlWidget->chart_mod = 2;
+        xBtn->setEnabled(false);
+        yBtn->setEnabled(false);
+        zBtn->setEnabled(false);
+        break;
+    }
+    case 2:
+    {
+        currentGlWidget->rot_2d();
+        currentGlWidget->chart_mod = 3;
+        xBtn->setEnabled(false);
+        yBtn->setEnabled(false);
+        zBtn->setEnabled(false);
+        break;
+    }
+    case 3:
+    {
+        currentGlWidget->rot_2d();
+        currentGlWidget->chart_mod = 4;
+        xBtn->setEnabled(false);
+        yBtn->setEnabled(false);
+        zBtn->setEnabled(false);
+        break;
+    }
+    case 4:
+    {
+        currentGlWidget->rot_2d();
+        currentGlWidget->chart_mod = 5;
+        xBtn->setEnabled(false);
+        yBtn->setEnabled(false);
+        zBtn->setEnabled(false);
+        break;
+    }
     }
 }
 
@@ -231,6 +236,21 @@ void Window::chooseFilterChange()
         case 1:
         {
             currentGlWidget->selectFilter(2);
+            break;
+        }
+        case 2:
+        {
+            currentGlWidget->selectFilter(3);
+            break;
+        }
+        case 3:
+        {
+            currentGlWidget->selectFilter(4);
+            break;
+        }
+        case 4:
+        {
+            currentGlWidget->selectFilter(5);
             break;
         }
     }

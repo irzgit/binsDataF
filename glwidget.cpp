@@ -8,6 +8,7 @@
 #include <QPainter>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <iostream>
 
 GLWidget::GLWidget(QWidget *parent)
     : QOpenGLWidget(parent),
@@ -29,6 +30,7 @@ GLWidget::GLWidget(QWidget *parent)
     connect(m_thread, &MasterThread::response, this, &GLWidget::showResponse);
     connect(m_thread, &MasterThread::error, this, &GLWidget::processError);
 }
+
 
 GLWidget::~GLWidget()
 {
@@ -88,6 +90,7 @@ void GLWidget::paintGL()
     }
 
     renderText(30,30,"Input line: " + bufline);
+    renderText(30, 50, "Сторона квадрата: 3см");
     QString s1;
     if (bins_data.count < 200)
     {
@@ -99,7 +102,7 @@ void GLWidget::paintGL()
         s1 = "count: ";
         s1.append(QString::number(bins_data.count));
     }
-    renderText(30,50,s1);
+    renderText(30,70,s1);
 
     glPopMatrix();
     this->update();
@@ -118,7 +121,8 @@ void GLWidget::drawAxis()//построение координатных осе�
    glColor3f (0.85f, 0.85f, 0.85f);
    float ad = 0.7;
    float buf = abs(minZ-ad);
-   for (float i = 0;i <= (maxZ+ad+buf);i+=(maxZ+ad+buf)/10)
+   float StartMaxZ = 0.1f;
+   for (float i = 0;i <= (maxZ+ad+buf);i+=(maxZ+ad+buf)/(10 * (maxZ + ad + buf) / (StartMaxZ + ad + abs(-0.1 - ad))))
    {
        glBegin(GL_LINE_STRIP);
            glColor3f(0.85f, 0.85f, 0.85f);
@@ -128,9 +132,11 @@ void GLWidget::drawAxis()//построение координатных осе�
            glColor3f(0.0,0.0,0.0);
            glVertex3f( maxX + ad + ad/20, minY - ad, minZ - ad + i);
        glEnd();
+       //std::cout << endl << (maxZ+ad+buf)  << " ";
    }
    float buf1 = abs(minX - ad);
-   for (float i = 0;i <= (maxX+ad+buf1);i+=(maxX+ad+buf1)/10)
+   float StartMaxX = 0.1f;
+   for (float i = 0;i <= (maxX+ad+buf1);i+=(maxX+ad+buf1)/(10 * (maxX + ad + buf) / (StartMaxX + ad + abs(-0.1 - ad))))
    {
        glBegin(GL_LINE_STRIP);
            glColor3f(0.85f, 0.85f, 0.85f);
@@ -142,7 +148,8 @@ void GLWidget::drawAxis()//построение координатных осе�
        glEnd();
    }
    float buf2 = abs(minY - ad);
-   for (float i = 0;i <= (maxY+ad+buf2);i+=(maxY+ad+buf2)/10)
+   float StartMaxY = 0.1f;
+   for (float i = 0;i <= (maxY+ad+buf2);i+=(maxY+ad+buf2)/(10 * (maxY + ad + buf) / (StartMaxY + ad + abs(-0.1 - ad))))
    {
        glBegin(GL_LINE_STRIP);
            glColor3f(0.85f, 0.85f, 0.85f);
@@ -583,16 +590,16 @@ void GLWidget::draw_positions()
             glVertex2f(a_x1,y1);
             glVertex2f(a_x2,y2);
         glEnd();
-        glColor3f(0,1,0);
-        glBegin(GL_LINE_STRIP);
-            glVertex2f(a_y1,y1);
-            glVertex2f(a_y2,y2);
-        glEnd();
-        glColor3f(0,0,1);
-        glBegin(GL_LINE_STRIP);
-            glVertex2f(a_z1,y1);
-            glVertex2f(a_z2,y2);
-        glEnd();
+            glColor3f(0,1,0);
+            glBegin(GL_LINE_STRIP);
+                glVertex2f(a_y1,y1);
+                glVertex2f(a_y2,y2);
+            glEnd();
+            glColor3f(0,0,1);
+            glBegin(GL_LINE_STRIP);
+                glVertex2f(a_z1,y1);
+                glVertex2f(a_z2,y2);
+            glEnd();
     }
 }
 
@@ -787,5 +794,11 @@ void GLWidget::selectFilter(int mode)
             break;
         }
     }
+}
+
+int GLWidget::getBins()
+{
+
+    return bins_data.count;
 }
 

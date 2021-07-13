@@ -16,12 +16,16 @@ TEMPLATE = app
 
 SOURCES += \
         main.cpp \
+    runningAverage.cpp \
     window.cpp \
     glwidget.cpp \
     datawork.cpp \
     masterthread.cpp
 
 HEADERS += \
+    median3.h \
+    runningAverage.h \
+    runningAverage.h \
     window.h \
     glwidget.h \
     datawork.h \
