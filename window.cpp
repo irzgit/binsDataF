@@ -76,10 +76,13 @@ Window::Window()
     m_chooseFilter = new QComboBox(this);
     m_chooseFilter->setMaximumWidth(300);
     m_chooseFilter->addItem("no filter");
-    m_chooseFilter->addItem("GMedian3");
-    m_chooseFilter->addItem("GMedian");
-    m_chooseFilter->addItem("GLinear");
-    m_chooseFilter->addItem("FastFilter");
+    m_chooseFilter->addItem("Fast Filter");
+    m_chooseFilter->addItem("ABfilter");
+    m_chooseFilter->addItem("RingAverageFilter");
+    m_chooseFilter->addItem("Med3Filter");
+    m_chooseFilter->addItem("MedFilter");
+    m_chooseFilter->addItem("KalmanFilter");
+    m_chooseFilter->addItem("RAfilter");
 
     connect(m_chooseFilter, &QComboBox::currentTextChanged, this, &Window::chooseFilterChange);
 
@@ -228,31 +231,46 @@ void Window::chooseFilterChange()
 {
     switch(m_chooseFilter->currentIndex())
     {
-        case 0:
-        {
-            currentGlWidget->selectFilter(1);
-            break;
-        }
-        case 1:
-        {
-            currentGlWidget->selectFilter(2);
-            break;
-        }
-        case 2:
-        {
-            currentGlWidget->selectFilter(3);
-            break;
-        }
-        case 3:
-        {
-            currentGlWidget->selectFilter(4);
-            break;
-        }
-        case 4:
-        {
-            currentGlWidget->selectFilter(5);
-            break;
-        }
+    case 0:
+    {
+        currentGlWidget->selectFilter(1);
+        break;
+    }
+    case 1:
+    {
+        currentGlWidget->selectFilter(2);
+        break;
+    }
+    case 2:
+    {
+        currentGlWidget->selectFilter(3);
+        break;
+    }
+    case 3:
+    {
+        currentGlWidget->selectFilter(4);
+        break;
+    }
+    case 4:
+    {
+        currentGlWidget->selectFilter(5);
+        break;
+    }
+    case 5:
+    {
+        currentGlWidget->selectFilter(6);
+        break;
+    }
+    case 6:
+    {
+        currentGlWidget->selectFilter(7);
+        break;
+    }
+    case 7:
+    {
+        currentGlWidget->selectFilter(8);
+        break;
+    }
     }
 }
 

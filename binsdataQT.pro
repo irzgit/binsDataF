@@ -23,7 +23,12 @@ SOURCES += \
     masterthread.cpp
 
 HEADERS += \
+    abfilter.h \
+    fastfilt.h \
+    kalman.h \
+    median.h \
     median3.h \
+    ringaverage.h \
     runningAverage.h \
     runningAverage.h \
     window.h \

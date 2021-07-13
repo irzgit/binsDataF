@@ -2,6 +2,12 @@
 #include <math.h>
 #include <iostream>
 #include <runningAverage.h>
+#include <kalman.h>
+#include <median.h>
+#include <median3.h>
+#include <ringaverage.h>
+#include <abfilter.h>
+#include <fastfilt.h>
 
 #include <eigen3/Eigen/Dense>
 
@@ -211,6 +217,13 @@ void datawork::readStr(QString str)
 
 }
 GFilterRA RAfilter_X, RAfilter_Y, RAfilter_Z;
+GKalman KalmanFilterX(40, 40, 0.5), KalmanFilterY(40, 40, 0.5), KalmanFilterZ(40, 40, 0.5);
+GMedian<10, float> MedFilterX, MedFilterY, MedFilterZ;
+GMedian3<float> Med3FilterX, Med3FilterY, Med3FilterZ;
+RingAverage<float, 50> RingAverageFilterX, RingAverageFilterY, RingAverageFilterZ;
+GABfilter ABfilterX(0.8, 40, 1), ABfilterY(0.8, 40, 1), ABfilterZ(0.8, 40, 1);
+FastFilter FastX(29), FastY(29), FastZ(29);
+
 void datawork::lineToData()
 {
     if ((datastr[0] == "+") && (datastr[datastr.size() - 1] == "+"))
@@ -241,11 +254,15 @@ void datawork::lineToData()
                 }
                 case 2:
                 {
-                    RAfilter_X.setCoef(1);
+                    RAfilter_X.setCoef(0.1);
                     RAfilter_X.setStep(5);
-                    RAfilter_Y.setCoef(1);
+
+
+                    RAfilter_Y.setCoef(0.1);
                     RAfilter_Y.setStep(5);
-                    RAfilter_Z.setCoef(1);
+
+
+                    RAfilter_Z.setCoef(0.1);
                     RAfilter_Z.setStep(5);
                     break;
                 }
@@ -295,18 +312,39 @@ void datawork::lineToData()
                     }
                     case 2:
                     {
+                        FastX.setRaw(value);
+                        FastX.computeNow();
+                        a_read.x = FastX.getFil();
                         break;
                     }
                     case 3:
                     {
+                        a_read.x = ABfilterX.filtered(value);
                         break;
                     }
                     case 4:
                     {
+                        a_read.x = RingAverageFilterX.filteredFloat(value);
                         break;
                     }
                     case 5:
                     {
+                        a_read.x = Med3FilterX.filtered(value);
+                        break;
+                    }
+                    case 6:
+                    {
+                        a_read.x = MedFilterX.filtered(value);
+                        break;
+                    }
+                    case 7:
+                    {
+                        a_read.x = KalmanFilterX.filtered(value);
+                        break;
+                    }
+                    case 8:
+                    {
+                        a_read.x = RAfilter_X.filteredTime(value, 100);
                         break;
                     }
                     }
@@ -323,18 +361,39 @@ void datawork::lineToData()
                     }
                     case 2:
                     {
+                        FastY.setRaw(value);
+                        FastY.computeNow();
+                        a_read.y = FastY.getFil();
                         break;
                     }
                     case 3:
                     {
+                        a_read.y = ABfilterY.filtered(value);
                         break;
                     }
                     case 4:
                     {
+                        a_read.y = RingAverageFilterY.filteredFloat(value);
                         break;
                     }
                     case 5:
                     {
+                        a_read.y = Med3FilterY.filtered(value);
+                        break;
+                    }
+                    case 6:
+                    {
+                        a_read.y = MedFilterY.filtered(value);
+                        break;
+                    }
+                    case 7:
+                    {
+                        a_read.y = KalmanFilterY.filtered(value);
+                        break;
+                    }
+                    case 8:
+                    {
+                        a_read.y = RAfilter_Y.filteredTime(value, 100);
                         break;
                     }
                     }
@@ -346,23 +405,44 @@ void datawork::lineToData()
                     {
                     case 1:
                     {
-                        a_read.z=value;
+                        a_read.z = value;
                         break;
                     }
                     case 2:
                     {
+                        FastZ.setRaw(value);
+                        FastZ.computeNow();
+                        a_read.z = FastZ.getFil();
                         break;
                     }
                     case 3:
                     {
+                        a_read.z = ABfilterZ.filtered(value);
                         break;
                     }
                     case 4:
                     {
+                        a_read.z = RingAverageFilterZ.filteredFloat(value);
                         break;
                     }
                     case 5:
                     {
+                        a_read.z = Med3FilterZ.filtered(value);
+                        break;
+                    }
+                    case 6:
+                    {
+                        a_read.z = MedFilterZ.filtered(value);
+                        break;
+                    }
+                    case 7:
+                    {
+                        a_read.z = KalmanFilterZ.filtered(value);
+                        break;
+                    }
+                    case 8:
+                    {
+                        a_read.z = RAfilter_Z.filteredTime(value, 100);
                         break;
                     }
                     }
