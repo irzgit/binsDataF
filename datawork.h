@@ -37,7 +37,7 @@ private:
     void filtMatlab();
 
 public:
-    int count;
+    int count=0;
     QVector <QString> allData;//все строки
     QVector <Quaternion> quaternions;//все кватернионы
     QVector <p_data> accelerations;//все ускорения
