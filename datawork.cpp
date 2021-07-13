@@ -222,7 +222,16 @@ void datawork::lineToData()
         QString valueLine = "";
         float value = 0;
 
+//        RAfilter_X.setCoef(1);
+//        RAfilter_X.setStep(5);
 
+
+//        RAfilter_Y.setCoef(1);
+//        RAfilter_Y.setStep(5);
+
+
+//        RAfilter_Z.setCoef(1);
+//        RAfilter_Z.setStep(5);
 
         int valueNumber = 0;
         for (int i = 0; i < datastr.length(); i++)
@@ -233,37 +242,6 @@ void datawork::lineToData()
             }
             else
             {
-
-                switch(filter_mode)
-                {
-                case 1:
-                {
-
-                    break;
-                }
-                case 2:
-                {
-
-                    RAfilter_X.setCoef(1);
-                    RAfilter_X.setStep(5);
-
-
-                    RAfilter_Y.setCoef(1);
-                    RAfilter_Y.setStep(5);
-
-
-                    RAfilter_Z.setCoef(1);
-                    RAfilter_Z.setStep(5);
-                    break;
-                }
-                case 3:
-                {
-                    value = 0;
-                    break;
-                }
-                }
-
-
                 value = valueLine.toFloat();
                 switch(valueNumber)
                 {
@@ -285,41 +263,14 @@ void datawork::lineToData()
                 }
                 case 4 : {
                     a_read.x = value;
-                    switch(filter_mode)
-                    {
-                    case 2:
-                    {
-                        a_read.x = RAfilter_X.filteredTime(a_read.x, count);
-                        break;
-                    }
-                    }
-
                     break;
                 }
                 case 5 : {
                     a_read.y = value;
-                    switch(filter_mode)
-                    {
-                    case 2:
-                    {
-                        a_read.y = RAfilter_Y.filteredTime(a_read.y, count);
-                        break;
-                    }
-                    }
-
                     break;
                 }
                 case 6: {
                     a_read.z=value;
-                    switch(filter_mode)
-                    {
-                    case 2:
-                    {
-                        a_read.z = RAfilter_Z.filteredTime(a_read.z, count);
-                        break;
-                    }
-                    }
-
                     break;
                 }
                 case 7: {
