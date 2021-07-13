@@ -223,17 +223,6 @@ void datawork::lineToData()
         float value = 0;
 
 
-        RAfilter_X.setCoef(1);
-        RAfilter_X.setStep(5);
-        RAfilter_X.setCount(count);
-
-        RAfilter_Y.setCoef(1);
-        RAfilter_Y.setStep(5);
-        RAfilter_Y.setCount(count);
-
-        RAfilter_Z.setCoef(1);
-        RAfilter_Z.setStep(5);
-        RAfilter_Z.setCount(count);
 
         int valueNumber = 0;
         for (int i = 0; i < datastr.length(); i++)
@@ -244,6 +233,50 @@ void datawork::lineToData()
             }
             else
             {
+                switch(filter_mode)
+                {
+                case 1:
+                {
+
+                    break;
+                }
+                case 2: // GFilterRA
+                {
+
+                    RAfilter_X.setCoef(1);
+                    RAfilter_X.setStep(5);
+                    RAfilter_X.setCount(count);
+
+                    RAfilter_Y.setCoef(1);
+                    RAfilter_Y.setStep(5);
+                    RAfilter_Y.setCount(count);
+
+                    RAfilter_Z.setCoef(1);
+                    RAfilter_Z.setStep(5);
+                    RAfilter_Z.setCount(count);
+
+
+
+                    break;
+                }
+                case 3:
+                {
+
+                    break;
+                }
+                case 4:
+                {
+
+                    break;
+                }
+                case 5:
+                {
+
+                    break;
+                }
+                }
+
+
                 value = valueLine.toFloat();
                 switch(valueNumber)
                 {
@@ -265,17 +298,48 @@ void datawork::lineToData()
                 }
                 case 4 : {
                     a_read.x = value;
-                    a_read.x = RAfilter_X.filteredTime(a_read.x, count);
+                    switch(filter_mode)
+                    {
+                    case 2:
+                    {
+                        a_read.x = RAfilter_X.filteredTime(a_read.x, count);
+                    }
+                    case 3:
+                    {
+
+                    }
+                    }
+
                     break;
                 }
                 case 5 : {
                     a_read.y = value;
-                    a_read.y = RAfilter_Y.filteredTime(a_read.y, count);
+                    switch(filter_mode)
+                    {
+                    case 2:
+                    {
+                        a_read.x = RAfilter_Y.filteredTime(a_read.x, count);
+                    }
+                    case 3:
+                    {
+
+                    }
+                    }
                     break;
                 }
                 case 6: {
                     a_read.z=value;
-                    a_read.z = RAfilter_Z.filteredTime(a_read.z, count);
+                    switch(filter_mode)
+                    {
+                    case 2:
+                    {
+                        a_read.x = RAfilter_Z.filteredTime(a_read.x, count);
+                    }
+                    case 3:
+                    {
+
+                    }
+                    }
                     break;
                 }
                 case 7: {
@@ -302,34 +366,7 @@ void datawork::lineToData()
                 valueLine = "";
             }
         }
-        switch(filter_mode)
-        {
-        case 1:
-        {
 
-            break;
-        }
-        case 2:
-        {
-
-            break;
-        }
-        case 3:
-        {
-
-            break;
-        }
-        case 4:
-        {
-
-            break;
-        }
-        case 5:
-        {
-
-            break;
-        }
-        }
         filt();
     }
 }

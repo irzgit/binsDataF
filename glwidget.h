@@ -31,7 +31,7 @@ public:
     void saveLog();
     void readFromFile();
     void selectFilter(int mode);
-    int getBins();
+
 
 
     int chart_mod = 1;

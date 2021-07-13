@@ -796,9 +796,5 @@ void GLWidget::selectFilter(int mode)
     }
 }
 
-int GLWidget::getBins()
-{
 
-    return bins_data.count;
-}
 
