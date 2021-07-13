@@ -233,6 +233,7 @@ void datawork::lineToData()
             }
             else
             {
+
                 switch(filter_mode)
                 {
                 case 1:
@@ -240,38 +241,24 @@ void datawork::lineToData()
 
                     break;
                 }
-                case 2: // GFilterRA
+                case 2:
                 {
 
                     RAfilter_X.setCoef(1);
                     RAfilter_X.setStep(5);
-                    RAfilter_X.setCount(count);
+
 
                     RAfilter_Y.setCoef(1);
                     RAfilter_Y.setStep(5);
-                    RAfilter_Y.setCount(count);
+
 
                     RAfilter_Z.setCoef(1);
                     RAfilter_Z.setStep(5);
-                    RAfilter_Z.setCount(count);
-
-
-
                     break;
                 }
                 case 3:
                 {
-
-                    break;
-                }
-                case 4:
-                {
-
-                    break;
-                }
-                case 5:
-                {
-
+                    value = 0;
                     break;
                 }
                 }
@@ -303,10 +290,7 @@ void datawork::lineToData()
                     case 2:
                     {
                         a_read.x = RAfilter_X.filteredTime(a_read.x, count);
-                    }
-                    case 3:
-                    {
-
+                        break;
                     }
                     }
 
@@ -318,13 +302,11 @@ void datawork::lineToData()
                     {
                     case 2:
                     {
-                        a_read.x = RAfilter_Y.filteredTime(a_read.x, count);
+                        a_read.y = RAfilter_Y.filteredTime(a_read.y, count);
+                        break;
                     }
-                    case 3:
-                    {
+                    }
 
-                    }
-                    }
                     break;
                 }
                 case 6: {
@@ -333,13 +315,11 @@ void datawork::lineToData()
                     {
                     case 2:
                     {
-                        a_read.x = RAfilter_Z.filteredTime(a_read.x, count);
+                        a_read.z = RAfilter_Z.filteredTime(a_read.z, count);
+                        break;
                     }
-                    case 3:
-                    {
+                    }
 
-                    }
-                    }
                     break;
                 }
                 case 7: {
@@ -367,7 +347,7 @@ void datawork::lineToData()
             }
         }
 
-        filt();
+        filt(); // интегрирование координат
     }
 }
 

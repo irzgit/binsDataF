@@ -47,6 +47,6 @@ float GFilterRA::filtered(float value) {
     return _lastValue;
 }
 
-void GFilterRA::setCount(int value) {
-    count = value;
-}
+//void GFilterRA::setCount(int value) {
+//    count = value;
+//}
