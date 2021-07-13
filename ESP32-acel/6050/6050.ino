@@ -127,11 +127,11 @@ azf-=gravity.z;
       //uint8_t Mesadge2[100];
      // for(int i=0; i<kol; i++)Mesadge2[i] = Mesadge[i];
       Serial.println(str);
-      SerialBT.println(str);
+ //     SerialBT.println(str); //без блютуза получаем почти 1кГц
       //SerialBT.write(Mesadge2, kol);
  
       samplePeriod = (millis() - start);
-      if(samplePeriod<10) delay(10-samplePeriod);
+//      if(samplePeriod<10) delay(10-samplePeriod); //задержка на 100Гц
 }
 
 
