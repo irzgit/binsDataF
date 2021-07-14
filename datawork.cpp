@@ -653,9 +653,6 @@ void datawork::filt()
     if (lpMag < statKoeff)
     {
         zeroPeriod++;
-        //        if(i_pos.x != 0) i_vel.x = i_pos.x;       //Для угловой скорости
-        //        if(i_pos.y != 0) i_vel.y = i_pos.y;
-        //        if(i_pos.z != 0) i_vel.z = i_pos.z;
 
         i_vel.x = 0;
         i_vel.y = 0;
@@ -664,16 +661,10 @@ void datawork::filt()
     }
     else
     {
-        //std::cout << a_read.x << " " << a_read.y << " " << a_read.z << " " << " "<<zeroPeriod <<std::endl;
-        //std::cout << " " << g_read.x<< " " << g_read.y<< " " << g_read.z<<std::endl;
-        //std::cout <<lpMag<<std::endl;
-        //std::cout <<gMag<<std::endl;
+
         zeroPeriod=0;
         quaternions.push_back(q_read);
         accelerations.push_back(a_read);
-
-        //std::cout << a_read.x << " " << a_read.y << " " << a_read.z << " " << " "<<zeroPeriod <<std::endl;
-        //std::cout << " " << " " << g_read.x<< " " << g_read.y<< " " << g_read.z<<std::endl;
 
 //        if(abs(a_read.x)>10)
 //        {i_vel.x=i_vel.x;
