@@ -91,7 +91,8 @@ Window::Window()
     //choose
     m_chooseChart = new QComboBox(this);
     m_chooseChart->setMaximumWidth(300);
-    m_chooseChart->addItem("trajectory");
+    m_chooseChart->addItem("trajectory acc");
+    m_chooseChart->addItem("trajectory gyro");
     m_chooseChart->addItem("accelerations");
     m_chooseChart->addItem("stationary periods");
     m_chooseChart->addItem("velocities");
@@ -190,11 +191,11 @@ void Window::chooseChartChange()
     }
     case 1:
     {
-        currentGlWidget->rot_2d();
+        currentGlWidget->rot_3d();
         currentGlWidget->chart_mod = 2;
-        xBtn->setEnabled(false);
-        yBtn->setEnabled(false);
-        zBtn->setEnabled(false);
+        xBtn->setEnabled(true);
+        yBtn->setEnabled(true);
+        zBtn->setEnabled(true);
         break;
     }
     case 2:
@@ -219,6 +220,15 @@ void Window::chooseChartChange()
     {
         currentGlWidget->rot_2d();
         currentGlWidget->chart_mod = 5;
+        xBtn->setEnabled(false);
+        yBtn->setEnabled(false);
+        zBtn->setEnabled(false);
+        break;
+    }
+    case 5:
+    {
+        currentGlWidget->rot_2d();
+        currentGlWidget->chart_mod = 6;
         xBtn->setEnabled(false);
         yBtn->setEnabled(false);
         zBtn->setEnabled(false);

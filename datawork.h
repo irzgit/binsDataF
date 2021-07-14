@@ -26,23 +26,27 @@ public:
     datawork();
     ~datawork();
     void clearAll();
+    p_data a_read;
+    p_data g_read;
 
 private:
     QString datastr;//входная строка
-    p_data a_read;
-    p_data g_read;
+
     //Quaternion q_read;
     void lineToData();
     void filt();
     void filtMatlab();
+    void DebugOut(p_data RawDataAcc, p_data RawDataGyro, p_data FilteredDataAcc, p_data FilteredDataGyro);
 
 public:
     int count = 0;
+    int freq = 0;
     QVector <QString> allData;//все строки
     QVector <Quaternion> quaternions;//все кватернионы
     QVector <p_data> accelerations;//все ускорения
     QVector <p_data> velocities;//все скорости
     QVector <p_data> positions;//все позиции
+    QVector <p_data> angles;//все углы
     QVector <p_data> acc_nograv;//ускорения после удаления гравитации
     QVector <float> magnLp;//магнитуды ускорений
     QVector <int> statPeriods;//стационарные периоды
@@ -52,6 +56,7 @@ public:
     float statKoeff = 0.15;//коэффициэнт отсечения
     p_data i_vel{0.0,0.0,0.0};//переменная для интегрирования скоростей
     p_data i_pos{0.0,0.0,0.0};//переменная для интегрирования координат
+    p_data i_ang{0.0, 0.0, 0.0};
     float samplePeriod = 0.01;
     void readStr(QString str);
 

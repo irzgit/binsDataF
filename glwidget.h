@@ -33,7 +33,6 @@ public:
     void selectFilter(int mode);
 
 
-
     int chart_mod = 1;
 
 public slots:
@@ -52,7 +51,7 @@ protected:
     void mousePressEvent(QMouseEvent* pe);
     void mouseMoveEvent(QMouseEvent* pe);
     void wheelEvent(QWheelEvent *);
-    void draw_trajectory();
+    void draw_trajectory(int AccOrGyro);
     void draw_accelerations();
     void draw_stationary();
     void draw_velocities();

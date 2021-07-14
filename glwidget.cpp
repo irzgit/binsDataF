@@ -44,6 +44,7 @@ void GLWidget::initializeGL()
     glEnable(GL_CULL_FACE);
 }
 
+
 void GLWidget::paintGL()
 {
     glClearColor(169,25,50,1);
@@ -60,28 +61,34 @@ void GLWidget::paintGL()
     case 1:
     {
         drawAxis();
-        draw_trajectory();
+        draw_trajectory(0);
         break;
     }
     case 2:
     {
-        drawAxis2D();
-        draw_accelerations();
+        drawAxis();
+        draw_trajectory(1);
         break;
     }
     case 3:
     {
         drawAxis2D();
-        draw_stationary();
+        draw_accelerations();
         break;
     }
     case 4:
     {
         drawAxis2D();
-        draw_velocities();
+        draw_stationary();
         break;
     }
     case 5:
+    {
+        drawAxis2D();
+        draw_velocities();
+        break;
+    }
+    case 6:
     {
         drawAxis2D();
         draw_positions();
@@ -103,6 +110,85 @@ void GLWidget::paintGL()
         s1.append(QString::number(bins_data.count));
     }
     renderText(30,70,s1);
+
+
+    renderText(30, 90, "Filtrated data:");
+    renderText(30, 110, "acceleration X: ");
+    QString str = "";
+    if (bins_data.a_read.x >= 0) {
+        str = " ";
+    }
+    str.append(QString::number(bins_data.a_read.x));
+    while (str.length() < 5) {
+        str.append(" ");
+    }
+    renderText(250, 110, str);
+    //renderText(250, 110, QString::number(bins_data.a_read.x));
+
+    renderText(30, 130, "acceleration Y: ");
+    str = "";
+    if (bins_data.a_read.y >= 0) {
+        str = " ";
+    }
+    str.append(QString::number(bins_data.a_read.y));
+    while (str.length() < 5) {
+        str.append(" ");
+    }
+    renderText(250, 130, str);
+    //renderText(250, 130, QString::number(bins_data.a_read.y));
+
+
+    renderText(30, 150, "acceleration Z: ");
+    str = "";
+    if (bins_data.a_read.z >= 0) {
+        str = " ";
+    }
+    str.append(QString::number(bins_data.a_read.z));
+    while (str.length() < 5) {
+        str.append(" ");
+    }
+    renderText(250, 150, str);
+    //renderText(250, 150, QString::number(bins_data.a_read.z));
+
+
+    renderText(30, 170, "angular velocity X: ");
+    str = "";
+    if (bins_data.g_read.x >= 0) {
+        str = " ";
+    }
+    str.append(QString::number(bins_data.g_read.x));
+    while (str.length() < 5) {
+        str.append(" ");
+    }
+    renderText(250, 170, str);
+    //renderText(250, 170, QString::number(bins_data.g_read.x));
+
+
+    renderText(30, 190, "angular velocity Y: ");
+    str = "";
+    if (bins_data.g_read.y >= 0) {
+        str = " ";
+    }
+    str.append(QString::number(bins_data.g_read.y));
+    while (str.length() < 5) {
+        str.append(" ");
+    }
+    renderText(250, 190, str);
+    //renderText(250, 190, QString::number(bins_data.g_read.y));
+
+
+    renderText(30, 210, "angular velocity Z: ");
+    str = "";
+    if (bins_data.g_read.z >= 0) {
+        str = " ";
+    }
+    str.append(QString::number(bins_data.g_read.z));
+    while (str.length() < 5) {
+        str.append(" ");
+    }
+    renderText(250, 210, str);
+    //renderText(250, 210, QString::number(bins_data.g_read.z));
+
 
     glPopMatrix();
     this->update();
@@ -207,7 +293,7 @@ void GLWidget::drawAxis2D()
     }
 }
 
-void GLWidget::draw_trajectory()
+void GLWidget::draw_trajectory(int AccOrGyro)
 {
 
     float x1 = 0.0;
@@ -221,9 +307,24 @@ void GLWidget::draw_trajectory()
     {
         glPointSize(15.0); // Задаем размер точки
         x1 = x2;y1 = y2;z1 = z2;
-        x2 = bins_data.positions[i].x;
-        y2 = bins_data.positions[i].y;
-        z2 = bins_data.positions[i].z;
+
+        switch (AccOrGyro)
+        {
+        case 0: //Координаты
+        {
+            x2 = bins_data.positions[i].x;
+            y2 = bins_data.positions[i].y;
+            z2 = bins_data.positions[i].z;
+            break;
+        }
+        case 1: //углы наклона
+        {
+            x2 = bins_data.angles[i].x;
+            y2 = bins_data.angles[i].y;
+            z2 = bins_data.angles[i].z;
+            break;
+        }
+        }
         glColor3f(1,0,0);
         glBegin(GL_LINE_STRIP);
         glVertex3f(x1,y1,z1);
@@ -611,7 +712,7 @@ void GLWidget::mousePressEvent(QMouseEvent* pe)
 
 void GLWidget::mouseMoveEvent(QMouseEvent* pe)
 {
-    if ((pe->buttons() == Qt::LeftButton) && (chart_mod == 1))
+    if ((pe->buttons() == Qt::LeftButton) && (chart_mod == 1 || chart_mod == 2))
     {
         xRot += 120/0.1*(GLfloat)(pe->y()-mousePos.y())/height();
         //yRotation += 180/0.1*(GLfloat)(pe->x()-mousePos.y())/height();
