@@ -1,6 +1,7 @@
 #include "masterthread.h"
 #include <QMessageBox>
 #include <iostream>
+#include <QDebug>
 
 MasterThread::MasterThread(QObject *parent) :
     QThread(parent)
@@ -24,6 +25,7 @@ void MasterThread::runPort(const QString &portName, const int &serialPortBaudRat
 
 void MasterThread::run()
 {
+
     //QMessageBox::warning(0,"Warning", "Warning message text");
     bool currentPortNameChanged = false;
     QString currentPortName;
@@ -41,6 +43,7 @@ void MasterThread::run()
     }
     while (!m_quit)
     {
+
         //открыли порт и установили скорость
         if (currentPortNameChanged)
         {
@@ -61,6 +64,14 @@ void MasterThread::run()
         //read line
         while((waitLine(&serial,-1)) && (!m_quit))
         {
+            //Смена фильтра в МК
+            if(changeFilter == true)
+            {
+                this->changeFilter=false;
+                serial.write(numberOfFilter, 1);
+                qDebug()<<"Change to"<<QString(numberOfFilter[0]);
+            }
+
            QString response= serial.readLine().trimmed();
            emit this->response(response);
         }

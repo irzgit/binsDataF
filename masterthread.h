@@ -14,6 +14,8 @@ public:
     ~MasterThread();
     void runPort(const QString &portName, const int &serialPortBaudRate);
     void stop();
+    bool changeFilter = false;
+    char numberOfFilter[2] = {0,0};
 
 signals:
     void response(const QString &s);

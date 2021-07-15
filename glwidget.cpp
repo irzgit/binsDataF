@@ -886,22 +886,30 @@ void GLWidget::selectFilter(int mode)
     {
     case 1:
     {
-        bins_data.filter_mode = 1;
+       // bins_data.filter_mode = 1;
+        m_thread->numberOfFilter[0] = 0x04;   //Без фильтра
+        m_thread->changeFilter = true;
         break;
     }
     case 2:
     {
-        bins_data.filter_mode = 2;
+       // bins_data.filter_mode = 2;
+        m_thread->numberOfFilter[0] = 0x01;   //Бегущее среднее
+        m_thread->changeFilter = true;
         break;
     }
     case 3:
     {
-        bins_data.filter_mode = 3;
+       // bins_data.filter_mode = 3;
+        m_thread->numberOfFilter[0] = 0x02;       //Медианный
+        m_thread->changeFilter = true;
         break;
     }
     case 4:
     {
-        bins_data.filter_mode = 4;
+      //  bins_data.filter_mode = 4;
+        m_thread->numberOfFilter[0] = 0x03;       //Калман
+        m_thread->changeFilter = true;
         break;
     }
     case 5:

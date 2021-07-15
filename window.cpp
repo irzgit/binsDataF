@@ -52,11 +52,11 @@ Window::Window()
     m_serialPortBaudRateLabel->setMaximumWidth(70);
     m_serialPortBaudRateComboBox = new QComboBox();
     m_serialPortBaudRateComboBox->setMaximumWidth(80);
-    m_serialPortBaudRateComboBox->addItem(QStringLiteral("9600"), QSerialPort::Baud9600);
+    m_serialPortBaudRateComboBox->addItem(QStringLiteral("115200"), QSerialPort::Baud115200);
     m_serialPortBaudRateComboBox->addItem(QStringLiteral("19200"), QSerialPort::Baud19200);
     m_serialPortBaudRateComboBox->addItem(QStringLiteral("38400"), QSerialPort::Baud38400);
     m_serialPortBaudRateComboBox->addItem(QStringLiteral("57600"), QSerialPort::Baud57600);
-    m_serialPortBaudRateComboBox->addItem(QStringLiteral("115200"), QSerialPort::Baud115200);
+    m_serialPortBaudRateComboBox->addItem(QStringLiteral("9600"), QSerialPort::Baud9600);
     //run Stop button
     runStopButton = new QPushButton(tr("Run"),this);
     runStopButton->setAutoFillBackground(true);
@@ -76,9 +76,9 @@ Window::Window()
     m_chooseFilter = new QComboBox(this);
     m_chooseFilter->setMaximumWidth(300);
     m_chooseFilter->addItem("no filter");
-    m_chooseFilter->addItem("Fast Filter");
-    m_chooseFilter->addItem("ABfilter");
-    m_chooseFilter->addItem("RingAverageFilter");
+    m_chooseFilter->addItem("Average_MK");
+    m_chooseFilter->addItem("Mediana_MK");
+    m_chooseFilter->addItem("Kalman_MK");
     m_chooseFilter->addItem("Med3Filter");
     m_chooseFilter->addItem("MedFilter");
     m_chooseFilter->addItem("KalmanFilter");

@@ -2,13 +2,13 @@
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps_V6_12.h"
 #include "BluetoothSerial.h"
+#include "GyverFilters.h"
 
-#define FK 0.5 // коэффициент комплементарного фильтра
 #define statKoeff 0.04
+#define LED 25
 
 BluetoothSerial SerialBT;
 
-float q0, q1, q2, q3;
 int16_t ax, ay, az;
 int16_t gx, gy, gz;
 float axf, ayf, azf;
@@ -16,12 +16,7 @@ float gxf, gyf, gzf;
 float angleX = 0;
 float angleY = 0;
 float angleZ = 0;
-float xVel=0, yVel=0, zVel=0;           //Скорости
-float xVelOld=0, yVelOld=0, zVelOld=0;  //Скорости в предыдущий момент времени
-float xPos=0, yPos=0, zPos=0;           //Координаты
 
-
-static float filValX = 0, filValY=0, filValZ=0;
 
 
 const float toDeg = 180.0 / M_PI;
@@ -38,11 +33,20 @@ MPU6050 mpu;
 
 int samplePeriod = 0;
 
+uint8_t filter_select=0; // 0-без фильра, 1-среднее, 2-медиана, 3-калман
+
+void sort(float *mas, int size);
 void initDMP(); 
 void getAngles();
-void expRunningAverage();
+float mediana(float mas[10]);       //медианный
+float average(float mas[10]);  //среднее (принимает аккумулятор и колличесвто аккумулированныйх измерений, после аккумулятор обнуляется)
+int comp (const void * a, const void * b)
+{
+  return ( *(float*)a - *(float*)b );
+}
 void setup() 
 {
+  pinMode(LED,OUTPUT);
   Wire.begin();
   Wire.setClock(400000);
   Serial.begin(115200);
@@ -63,19 +67,28 @@ void setup()
   mpu.CalibrateAccel(10);
   mpu.CalibrateGyro(10);
   fifoCount = mpu.getFIFOCount();
+  //digitalWrite(LED,HIGH);
 }
+
+GKalman gx_k(40,40,0.5), gy_k(40,40,0.5), gz_k(40,40,0.5), ax_k(40,40,0.5), ay_k(40,40,0.5), az_k(40,40,0.5); 
 
 int count = 0;
 //аккумуляторы
 float q0_a=0, q1_a=0, q2_a=0, q3_a=0;
 float ax_a=0, ay_a=0, az_a=0;
 float gx_a=0, gy_a=0, gz_a=0;
+//накопители для медианного фильтра
+float q0_m[10], q1_m[10], q2_m[10], q3_m[10];
+float ax_m[10], ay_m[10], az_m[10];
+float gx_m[10], gy_m[10], gz_m[10];
 
-long int start = millis();
+//окончательные данные, которые пойдут навыход
+float q0_o=0, q1_o=0, q2_o=0, q3_o=0;
+float ax_o=0, ay_o=0, az_o=0;
+float gx_o=0, gy_o=0, gz_o=0;
+
 void loop() 
 {
-  unsigned long int st = micros();
-
   getAngles();
   mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
@@ -109,26 +122,52 @@ if(abs(azf)<0.01) azf=0;
 
 if(count==10)
 {
-  q0_a/=10; q1_a/=10; q2_a/=10; q3_a/=10;
-  ax_a/=10; ay_a/=10; az_a/=10;
-  gx_a/=10; gy_a/=10; gz_a/=10;
+  if(filter_select==0 || filter_select>3)
+  {
+      q0_o=q0_m[9]; q1_o=q1_m[9]; q2_o=q2_m[9]; q3_o=q3_m[9];
+      ax_o=ax_m[9]; ay_o=ay_m[9]; az_o=az_m[9];
+      gx_o=gx_m[9]; gy_o=gy_m[9]; gz_o=gz_m[9];
+      digitalWrite(LED,HIGH);
+  }
+  else if(filter_select==1)
+  {
+      q0_o=average(q0_m); q1_o=average(q1_m); q2_o=average(q2_m); q3_o=average(q3_m);
+      ax_o=average(ax_m); ay_o=average(ay_m); az_o=average(az_m);
+      gx_o=average(gx_m); gy_o=average(gy_m); gz_o=average(gz_m);
+      digitalWrite(LED,LOW);
+  }
+  else if(filter_select==2)
+  {
+      q0_o=mediana(q0_m); q1_o=mediana(q1_m); q2_o=mediana(q2_m); q3_o=mediana(q3_m);
+      ax_o=mediana(ax_m); ay_o=mediana(ay_m); az_o=mediana(az_m);
+      gx_o=mediana(gx_m); gy_o=mediana(gy_m); gz_o=mediana(gz_m);
+      digitalWrite(LED,HIGH);
+  }
+  else if(filter_select==3)
+  {
+       q0_o=q0_m[9]; q1_o=q1_m[9]; q2_o=q2_m[9]; q3_o=q3_m[9];
+       ax_o=ax_k.filtered(ax_m[9]); ay_o=ay_k.filtered(ay_m[9]); az_o=az_k.filtered(az_m[9]);
+       gx_o=gx_k.filtered(gx_m[9]); gy_o=gy_k.filtered(gy_m[9]); gz_o=gz_k.filtered(gz_m[9]);
+       digitalWrite(LED,LOW);
+  }
+  
+  
   char buf[100];
-  int len=sprintf(buf,"%c%+02.2f,%+02.2f,%+02.2f,%+02.2f,%+04.2f,%+04.2f,%+04.2f,%+03.2f,%+03.2f,%+03.2f%c",'#',q0_a,q1_a,q2_a,q3_a,gx_a,gy_a,gz_a,ax_a,ay_a,az_a,'#');
-    //  String str='+'+String(q0_a)+','+String(q1_a)+','+String(q2_a)+','+String(q3_a)+','+String(gx_a)+','+String(gy_a)+','+String(gz_a)+','+String(ax_a)+','+String(ay_a)+','+String(az_a)+'+';
-
-      Serial.println(buf);
-      SerialBT.println(buf);
- q0_a=0; q1_a=0; q2_a=0; q3_a=0;
- ax_a=0; ay_a=0; az_a=0;
- gx_a=0; gy_a=0; gz_a=0;
- count=0;
+  int len=sprintf(buf,"%c%+02.2f,%+02.2f,%+02.2f,%+02.2f,%+04.2f,%+04.2f,%+04.2f,%+03.2f,%+03.2f,%+03.2f%c",'#',q0_o,q1_o,q2_o,q3_o,gx_o,gy_o,gz_o,ax_o,ay_o,az_o,'#');
+  Serial.println(buf);
+  SerialBT.println(buf);
+  count=0;
+  if(Serial.available()>0)
+  {
+    filter_select=Serial.read();
+  }
 }
 else
 {
-  count++;
-  q0_a+=q.w; q1_a+=q.x; q2_a+=q.y; q3_a+=q.z;
-  ax_a+=axf; ay_a+=ayf; az_a+=azf;
-  gx_a+=gxf; gy_a+=gyf; gz_a+=gzf;    
+  q0_m[count]=q.w; q1_m[count]=q.x; q2_m[count]=q.y; q3_m[count]=q.z;
+  ax_m[count]=axf; ay_m[count]=ayf; az_m[count]=azf;
+  gx_m[count]=gzf; gy_m[count]=gyf; gz_m[count]=gzf;
+  count++;    
 }
      
 }
@@ -155,9 +194,21 @@ void getAngles()
   }
 }
 
-void expRunningAverage() 
+float average(float mas[10])
 {
-    filValX+=(axf-filValX)*FK;
-    filValY+=(ayf-filValY)*FK;
-    filValZ+=(azf-filValZ)*FK;
+  float av =0.0;
+  for(int i=0; i<10; i++) av+=mas[i];
+  av/=10.0;
+  return av;
+}
+float mediana(float mas[10])
+{
+  float med;
+  sort(mas,10);
+  return (mas[4]+mas[5])/2;
+}
+
+void sort(float *mas, int size) 
+{
+  qsort (mas, size, sizeof(float), comp);
 }
