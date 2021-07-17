@@ -602,7 +602,8 @@ void datawork::lineToData()
             }
         }
 
-        filt(); // интегрирование координат
+        //filt(); // интегрирование координат
+        outXYZ(); //вывод координат с есп
     }
 }
 
@@ -666,13 +667,13 @@ void datawork::filt()
         quaternions.push_back(q_read);
         accelerations.push_back(a_read);
 
-//        if(abs(a_read.x)>10)
-//        {i_vel.x=i_vel.x;
-//        i_vel.y=i_vel.y;
-//        i_vel.z=i_vel.z;
-//        }
-//        else
-//        {
+        //        if(abs(a_read.x)>10)
+        //        {i_vel.x=i_vel.x;
+        //        i_vel.y=i_vel.y;
+        //        i_vel.z=i_vel.z;
+        //        }
+        //        else
+        //        {
         i_vel.x = i_vel.x + a_read.x * samplePeriod;
         i_vel.y = i_vel.y + a_read.y * samplePeriod;
         i_vel.z = i_vel.z + a_read.z * samplePeriod;//}
@@ -686,10 +687,18 @@ void datawork::filt()
         positions.push_back(i_pos);
 
         //get angles
-        i_ang.x = i_ang.x + (g_read.x * samplePeriod)/10;
-        i_ang.y = i_ang.y + (g_read.y * samplePeriod)/10;
-        i_ang.z = i_ang.z + (g_read.z * samplePeriod)/10;
+        i_ang.x = i_ang.x + (g_read.x * samplePeriod);
+        i_ang.y = i_ang.y + (g_read.y * samplePeriod);
+        i_ang.z = i_ang.z + (g_read.z * samplePeriod);
         angles.push_back(i_ang);
+
+
+        //get angles
+        //        i_ang.x = i_ang.x + (g_read.x * samplePeriod)/10;
+        //        i_ang.y = i_ang.y + (g_read.y * samplePeriod)/10;
+        //        i_ang.z = i_ang.z + (g_read.z * samplePeriod)/10;
+
+
         //    i_pos.x = i_vel.x;        //Для угловой скорости
         //    i_pos.y = i_vel.y;
         //    i_pos.z = i_vel.z;
@@ -702,7 +711,28 @@ void datawork::filt()
 
 
 }
+void datawork::outXYZ()
+{
 
+    //        i_vel.x = a_read.x ;
+    //        i_vel.y = a_read.y;
+    //        i_vel.z = a_read.z;//}
+    //        velocities.push_back(i_vel);
+
+    i_pos.x = a_read.x;
+    i_pos.y = a_read.y;
+    i_pos.z = a_read.z;
+    positions.push_back(i_pos);
+
+    //get angles
+    i_ang.x = g_read.x;
+    i_ang.y = g_read.y;
+    i_ang.z = g_read.z;
+    angles.push_back(i_ang);
+
+    count++;
+
+}
 
 void datawork::clearAll()
 {

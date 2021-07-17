@@ -31,7 +31,6 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gra
 
 MPU6050 mpu;
 
-int samplePeriod = 0;
 
 uint8_t filter_select=0; // 0-без фильра, 1-среднее, 2-медиана, 3-калман
 
@@ -86,6 +85,11 @@ float gx_m[10], gy_m[10], gz_m[10];
 float q0_o=0, q1_o=0, q2_o=0, q3_o=0;
 float ax_o=0, ay_o=0, az_o=0;
 float gx_o=0, gy_o=0, gz_o=0;
+
+float i_angx=0, i_angy=0, i_angz=0;
+float i_velx=0, i_vely=0, i_velz=0;
+float i_posx=0, i_posy=0, i_posz=0;
+float samplePeriod = 0.01;
 
 void loop() 
 {
@@ -150,6 +154,30 @@ if(count==10)
        gx_o=gx_k.filtered(gx_m[9]); gy_o=gy_k.filtered(gy_m[9]); gz_o=gz_k.filtered(gz_m[9]);
        digitalWrite(LED,LOW);
   }
+
+  //интегрирование
+
+  
+  //get velocity
+  i_velx = i_velx + ax_o * samplePeriod;
+  i_vely = i_vely + ay_o * samplePeriod;
+  i_velz = i_velz + az_o * samplePeriod;
+  //get position
+  i_posx = i_posx + i_velx * samplePeriod;
+  i_posy = i_posy + i_vely * samplePeriod;
+  i_posz = i_posz + i_velz * samplePeriod;
+  //get angles
+  i_angx = i_angx + (gx_o * samplePeriod);
+  i_angy = i_angy + (gy_o * samplePeriod);
+  i_angz = i_angz + (gz_o * samplePeriod);
+
+  gx_o = i_angx;
+  gy_o = i_angy;
+  gz_o = i_angz;
+  ax_o = i_posx;
+  ay_o = i_posy;
+  az_o = i_posz;
+
   
   
   char buf[100];

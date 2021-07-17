@@ -35,6 +35,7 @@ private:
     //Quaternion q_read;
     void lineToData();
     void filt();
+    void outXYZ();
     void filtMatlab();
     void DebugOut(p_data RawDataAcc, p_data RawDataGyro, p_data FilteredDataAcc, p_data FilteredDataGyro);
 
