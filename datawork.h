@@ -58,7 +58,7 @@ public:
     p_data i_vel{0.0,0.0,0.0};//переменная для интегрирования скоростей
     p_data i_pos{0.0,0.0,0.0};//переменная для интегрирования координат
     p_data i_ang{0.0, 0.0, 0.0};
-    float samplePeriod = 0.01;
+    float samplePeriod = 0.005;
     void readStr(QString str);
 
     int filter_mode = 1;

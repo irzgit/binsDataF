@@ -4,6 +4,7 @@
 #include "BluetoothSerial.h"
 #include "GyverFilters.h"
 
+
 #define statKoeff 0.04
 #define LED 25
 
@@ -28,11 +29,14 @@ uint8_t fifoBuffer[64]; // FIFO storage buffer
 Quaternion q;           // [w, x, y, z]         quaternion container
 VectorFloat gravity;    // [x, y, z]            gravity vector
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
+VectorInt16 aa;         // [x, y, z]            accel sensor measurements
+VectorInt16 aaReal;     // [x, y, z]            gravity-free accel sensor measurements
 
 MPU6050 mpu;
 
 
 uint8_t filter_select=0; // 0-без фильра, 1-среднее, 2-медиана, 3-калман
+int count = 0;
 
 void sort(float *mas, int size);
 void initDMP(); 
@@ -48,7 +52,7 @@ void setup()
   pinMode(LED,OUTPUT);
   Wire.begin();
   Wire.setClock(400000);
-  Serial.begin(115200);
+  Serial.begin(1000000);
   while(!Serial) {}
   if (!SerialBT.begin("ESP32")) Serial.println("An error occurred initializing Bluetooth");
   else Serial.println("Bluetooth initialized");
@@ -67,11 +71,13 @@ void setup()
   mpu.CalibrateGyro(10);
   fifoCount = mpu.getFIFOCount();
   //digitalWrite(LED,HIGH);
+  mpu.setDLPFMode(MPU6050_DLPF_BW_42);
+
+  count = millis();
 }
 
 GKalman gx_k(40,40,0.5), gy_k(40,40,0.5), gz_k(40,40,0.5), ax_k(40,40,0.5), ay_k(40,40,0.5), az_k(40,40,0.5); 
 
-int count = 0;
 //аккумуляторы
 float q0_a=0, q1_a=0, q2_a=0, q3_a=0;
 float ax_a=0, ay_a=0, az_a=0;
@@ -89,18 +95,30 @@ float gx_o=0, gy_o=0, gz_o=0;
 float i_angx=0, i_angy=0, i_angz=0;
 float i_velx=0, i_vely=0, i_velz=0;
 float i_posx=0, i_posy=0, i_posz=0;
-float samplePeriod = 0.01;
+float samplePeriod = 0.005;
+
+uint8_t dlpf=0;
+
 
 void loop() 
 {
+  if (count + 5 <= millis()) {
+    count = millis();
+
+//    Serial.print("b ");
+//    Serial.println(millis());
+  
   getAngles();
   mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
+//  Serial.print("a ");
+//    Serial.println(millis());
+
 //переводим в g
 
-axf = ax / 16384.0f;
-ayf = ay / 16384.0f;
-azf = az / 16384.0f;
+axf = ax / 16384.0f / 2;
+ayf = ay / 16384.0f / 2;
+azf = az / 16384.0f / 2;
 
 if(abs(axf)<0.01) axf=0;
 if(abs(ayf)<0.01) ayf=0;
@@ -124,80 +142,37 @@ if(abs(axf)<0.01) axf=0;
 if(abs(ayf)<0.01) ayf=0;
 if(abs(azf)<0.01) azf=0;
 
-if(count==10)
-{
-  if(filter_select==0 || filter_select>3)
-  {
-      q0_o=q0_m[9]; q1_o=q1_m[9]; q2_o=q2_m[9]; q3_o=q3_m[9];
-      ax_o=ax_m[9]; ay_o=ay_m[9]; az_o=az_m[9];
-      gx_o=gx_m[9]; gy_o=gy_m[9]; gz_o=gz_m[9];
-      digitalWrite(LED,HIGH);
-  }
-  else if(filter_select==1)
-  {
-      q0_o=average(q0_m); q1_o=average(q1_m); q2_o=average(q2_m); q3_o=average(q3_m);
-      ax_o=average(ax_m); ay_o=average(ay_m); az_o=average(az_m);
-      gx_o=average(gx_m); gy_o=average(gy_m); gz_o=average(gz_m);
-      digitalWrite(LED,LOW);
-  }
-  else if(filter_select==2)
-  {
-      q0_o=mediana(q0_m); q1_o=mediana(q1_m); q2_o=mediana(q2_m); q3_o=mediana(q3_m);
-      ax_o=mediana(ax_m); ay_o=mediana(ay_m); az_o=mediana(az_m);
-      gx_o=mediana(gx_m); gy_o=mediana(gy_m); gz_o=mediana(gz_m);
-      digitalWrite(LED,HIGH);
-  }
-  else if(filter_select==3)
-  {
-       q0_o=q0_m[9]; q1_o=q1_m[9]; q2_o=q2_m[9]; q3_o=q3_m[9];
-       ax_o=ax_k.filtered(ax_m[9]); ay_o=ay_k.filtered(ay_m[9]); az_o=az_k.filtered(az_m[9]);
-       gx_o=gx_k.filtered(gx_m[9]); gy_o=gy_k.filtered(gy_m[9]); gz_o=gz_k.filtered(gz_m[9]);
-       digitalWrite(LED,LOW);
-  }
+//dlpf = mpu.getDLPFMode();
 
   //интегрирование
 
   
   //get velocity
-  i_velx = i_velx + ax_o * samplePeriod;
-  i_vely = i_vely + ay_o * samplePeriod;
-  i_velz = i_velz + az_o * samplePeriod;
+  i_velx = i_velx + axf * samplePeriod;
+  i_vely = i_vely + ayf * samplePeriod;
+  i_velz = i_velz + azf * samplePeriod;
   //get position
   i_posx = i_posx + i_velx * samplePeriod;
   i_posy = i_posy + i_vely * samplePeriod;
   i_posz = i_posz + i_velz * samplePeriod;
   //get angles
-  i_angx = i_angx + (gx_o * samplePeriod);
-  i_angy = i_angy + (gy_o * samplePeriod);
-  i_angz = i_angz + (gz_o * samplePeriod);
+  i_angx = i_angx + (gxf * samplePeriod);
+  i_angy = i_angy + (gyf * samplePeriod);
+  i_angz = i_angz + (gzf * samplePeriod);
 
-  gx_o = i_angx;
-  gy_o = i_angy;
-  gz_o = i_angz;
-  ax_o = i_posx;
-  ay_o = i_posy;
-  az_o = i_posz;
-
-  
-  
   char buf[100];
-  int len=sprintf(buf,"%c%+02.2f,%+02.2f,%+02.2f,%+02.2f,%+04.2f,%+04.2f,%+04.2f,%+03.2f,%+03.2f,%+03.2f%c",'#',q0_o,q1_o,q2_o,q3_o,gx_o,gy_o,gz_o,ax_o,ay_o,az_o,'#');
-  Serial.println(buf);
-  SerialBT.println(buf);
-  count=0;
-  if(Serial.available()>0)
-  {
-    filter_select=Serial.read();
-  }
-}
-else
-{
-  q0_m[count]=q.w; q1_m[count]=q.x; q2_m[count]=q.y; q3_m[count]=q.z;
-  ax_m[count]=axf; ay_m[count]=ayf; az_m[count]=azf;
-  gx_m[count]=gzf; gy_m[count]=gyf; gz_m[count]=gzf;
-  count++;    
-}
-     
+
+  
+  //int len=sprintf(buf,"%c%+02.2f,%+02.2f,%+02.2f,%+02.2f,%+04.2f,%+04.2f,%+04.2f,%+03.2f,%+03.2f,%+03.2f%c",'#',q.w,q.x,q.y,q.z,gxf,gyf,gzf,aaReal.x,aaReal.y,aaReal.z,'#');
+  //int len=sprintf(buf,"%c%+02.2f,%+02.2f,%+02.2f,%+02.2f,%+04.2f,%+04.2f,%+04.2f,%+03.2f,%+03.2f,%+03.2f%c",'#',q.w,q.x,q.y,q.z,gxf,gyf,gzf,axf,ayf,azf,'#');
+
+  //int len=sprintf(buf,"%c%+02.2f,%+02.2f,%+02.2f,%+02.2f,%+04.2f,%+04.2f,%+04.2f,%+03.2f,%+03.2f,%+03.2f%c",'#',q.w,q.x,q.y,q.z,i_angx,i_angy,i_angz,i_posx,i_posy,i_posz,'#');
+
+ // Serial.println(buf);
+
+//  Serial.print("e ");
+//    Serial.println(millis());
+  }  
 }
 
 
@@ -215,6 +190,8 @@ void getAngles()
   {
     mpu.dmpGetQuaternion(&q, fifoBuffer);
     mpu.dmpGetGravity(&gravity, &q);
+    mpu.dmpGetAccel(&aa, fifoBuffer);
+    mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
     mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
     angleX = ypr[2] * toDeg;
     angleY = ypr[1] * toDeg;
