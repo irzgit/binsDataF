@@ -26,11 +26,18 @@ uint8_t devStatus;      // return status after each device operation (0 = succes
 uint16_t packetSize;    // expected DMP packet size (default is 42 bytes)
 uint16_t fifoCount;     // count of all bytes currently in FIFO
 uint8_t fifoBuffer[64]; // FIFO storage buffer
+
+
+// orientation/motion vars
 Quaternion q;           // [w, x, y, z]         quaternion container
-VectorFloat gravity;    // [x, y, z]            gravity vector
-float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 VectorInt16 aa;         // [x, y, z]            accel sensor measurements
+//VectorInt16 gy;         // [x, y, z]            gyro sensor measurements
 VectorInt16 aaReal;     // [x, y, z]            gravity-free accel sensor measurements
+VectorInt16 aaWorld;    // [x, y, z]            world-frame accel sensor measurements
+VectorFloat gravity;    // [x, y, z]            gravity vector
+float euler[3];         // [psi, theta, phi]    Euler angle container
+float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
+
 
 MPU6050 mpu;
 
@@ -110,15 +117,28 @@ void loop()
   
   getAngles();
   mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-
+    mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
+    mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
+   // Serial.println(mpu.getFullScaleAccelRange());
+ /* 0 = +/- 2g
+ * 1 = +/- 4g
+ * 2 = +/- 8g
+ * 3 = +/- 16g
+ */
 //  Serial.print("a ");
 //    Serial.println(millis());
 
 //переводим в g
 
-axf = ax / 16384.0f / 2;
-ayf = ay / 16384.0f / 2;
-azf = az / 16384.0f / 2;
+axf = aaReal.x / 16384.0f / 2;
+ayf = aaReal.y / 16384.0f / 2;
+azf = aaReal.z / 16384.0f / 2;
+//
+//aaWorld.x = aaWorld.x / 16384.0f / 2;
+//aaWorld.y = aaWorld.y / 16384.0f / 2;
+//aaWorld.z = aaWorld.z / 16384.0f / 2;
+
+
 
 if(abs(axf)<0.01) axf=0;
 if(abs(ayf)<0.01) ayf=0;
@@ -133,10 +153,10 @@ if(abs(gyf)<0.01) gyf=0;
 if(abs(gzf)<0.01) gzf=0;
 
 //Удаляем гравитацию
-
-axf-=gravity.x;
-ayf-=gravity.y;
-azf-=gravity.z;
+//
+//axf-=gravity.x;
+//ayf-=gravity.y;
+//azf-=gravity.z;
 
 if(abs(axf)<0.01) axf=0;
 if(abs(ayf)<0.01) ayf=0;
@@ -161,14 +181,18 @@ if(abs(azf)<0.01) azf=0;
   i_angz = i_angz + (gzf * samplePeriod);
 
   char buf[100];
+//  int len=sprintf(buf,"%c%+02.2f,%+02.2f,%+02.2f,%+02.2f,%+04.2f,%+04.2f,%+04.2f,%+03.2f,%+03.2f,%+03.2f%c",'#',q.w,q.x,q.y,q.z,gxf,gyf,gzf,aaWorld.x,aaWorld.y,aaWorld.z,'#');
 
-  
+  //int len=sprintf(buf,"%c%+02.2f,%+02.2f,%+02.2f,%+02.2f,%+04.2f,%+04.2f,%+04.2f,%u,%u,%u%c",'#',q.w,q.x,q.y,q.z,gxf,gyf,gzf,aaWorld.x,aaWorld.y,aaWorld.z,'#');
+  int len=sprintf(buf,"%c%+02.2f,%+02.2f,%+02.2f,%+02.2f,%+04.2f,%+04.2f,%+04.2f,%+03.2f,%+03.2f,%+03.2f%c",'#',q.w,q.x,q.y,q.z,gxf,gyf,gzf,axf,ayf,azf,'#');
+  Serial.println(buf);
+  //aaWorld.x
   //int len=sprintf(buf,"%c%+02.2f,%+02.2f,%+02.2f,%+02.2f,%+04.2f,%+04.2f,%+04.2f,%+03.2f,%+03.2f,%+03.2f%c",'#',q.w,q.x,q.y,q.z,gxf,gyf,gzf,aaReal.x,aaReal.y,aaReal.z,'#');
   //int len=sprintf(buf,"%c%+02.2f,%+02.2f,%+02.2f,%+02.2f,%+04.2f,%+04.2f,%+04.2f,%+03.2f,%+03.2f,%+03.2f%c",'#',q.w,q.x,q.y,q.z,gxf,gyf,gzf,axf,ayf,azf,'#');
 
   //int len=sprintf(buf,"%c%+02.2f,%+02.2f,%+02.2f,%+02.2f,%+04.2f,%+04.2f,%+04.2f,%+03.2f,%+03.2f,%+03.2f%c",'#',q.w,q.x,q.y,q.z,i_angx,i_angy,i_angz,i_posx,i_posy,i_posz,'#');
 
- // Serial.println(buf);
+
 
 //  Serial.print("e ");
 //    Serial.println(millis());
