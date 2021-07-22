@@ -52,7 +52,7 @@ Window::Window()
     m_serialPortBaudRateLabel->setMaximumWidth(70);
     m_serialPortBaudRateComboBox = new QComboBox();
     m_serialPortBaudRateComboBox->setMaximumWidth(80);
-    m_serialPortBaudRateComboBox->addItem(QStringLiteral("1000000"), QSerialPort::Baud1000000);
+    m_serialPortBaudRateComboBox->addItem(QStringLiteral("1000000"), 1000000);
     m_serialPortBaudRateComboBox->addItem(QStringLiteral("115200"), QSerialPort::Baud115200);
     m_serialPortBaudRateComboBox->addItem(QStringLiteral("19200"), QSerialPort::Baud19200);
     m_serialPortBaudRateComboBox->addItem(QStringLiteral("38400"), QSerialPort::Baud38400);
